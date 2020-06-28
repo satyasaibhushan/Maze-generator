@@ -1,13 +1,14 @@
 let cols, rows;
-let w = 60;
+let w = 30;
 let grid = [];
 let current;
+let stack = [];
 
 function setup() {
   createCanvas(600, 600);
   cols = floor(width / w);
   rows = floor(width / w);
-  frameRate(5)
+//   frameRate(5);
 
   for (let j = 0; j < cols; j++) {
     for (let i = 0; i < rows; i++) {
@@ -20,7 +21,7 @@ function setup() {
 }
 
 function draw() {
-  background("rgba(52, 152, 219,0.3)");
+  background(51);
   grid.forEach(element => {
     element.show();
   });
@@ -28,8 +29,16 @@ function draw() {
   let nextCell = current.checkedNeighbours();
 
   if (nextCell) {
-	  nextCell.isVisited = true;
-	  current = nextCell
+    current.isCurrent = false;
+    nextCell.isCurrent = true;
+    nextCell.isVisited = true;
+    stack.push(current);
+    removeWalls(current, nextCell);
+    current = nextCell;
+  } else if (stack.length > 0) {
+    current.isCurrent = false;
+    current = stack.pop();
+    current.isCurrent = true;
   }
 }
 
@@ -38,6 +47,7 @@ function Cell(i, j) {
   this.j = j;
   this.walls = [true, true, true, true];
   this.isVisited = false;
+  this.isCurrent = false;
 
   this.show = () => {
     let x = this.i * w;
@@ -50,7 +60,9 @@ function Cell(i, j) {
     if (this.walls[3]) line(x, y + w, x, y);
 
     if (this.isVisited) {
-      fill("rgba(241, 196, 15,0.7)");
+      noStroke();
+      if (this.isCurrent) fill(255, 255, 255, 125);
+      else fill(255, 255, 255, 25);
       rect(x, y, w, w);
     }
   };
@@ -75,3 +87,25 @@ function Cell(i, j) {
 }
 
 let index = (i, j) => (i < 0 || j < 0 || i > cols - 1 || j > cols - 1 ? undefined : i + j * cols);
+
+function removeWalls(curr, next) {
+  let distX = curr.i - next.i;
+  let distY = curr.j - next.j;
+
+  if (distX == -1) {
+    current.walls[1] = false;
+    next.walls[3] = false;
+  }
+  if (distX == 1) {
+    current.walls[3] = false;
+    next.walls[1] = false;
+  }
+  if (distY == -1) {
+    current.walls[2] = false;
+    next.walls[0] = false;
+  }
+  if (distY == 1) {
+    current.walls[0] = false;
+    next.walls[2] = false;
+  }
+}
