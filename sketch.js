@@ -1,9 +1,10 @@
 let cols, rows;
-let w = 30;
+let w = 20;
 let grid = [];
 let current;
 let stack = [];
-
+let maxStackLength = 0;
+let maxStackEle = null;
 function setup() {
   createCanvas(600, 600);
   cols = floor(width / w);
@@ -37,6 +38,12 @@ function draw() {
     current = nextCell;
   } else if (stack.length > 0) {
     current.isCurrent = false;
+    if (stack.length > maxStackLength) {
+      maxStackLength = stack.length;
+      if (maxStackEle) maxStackEle.isEnd = false;
+      maxStackEle = current;
+      current.isEnd = true;
+    }
     current = stack.pop();
     current.isCurrent = true;
   }
@@ -61,7 +68,8 @@ function Cell(i, j) {
 
     if (this.isVisited) {
       noStroke();
-      if (this.isCurrent) fill(255, 255, 255, 125);
+	  if (this.isCurrent) fill(255, 255, 255, 125);
+	  else if(this.isEnd) fill(255,0,0,175)
       else fill(255, 255, 255, 25);
       rect(x, y, w, w);
     }
